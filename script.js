@@ -1,11 +1,18 @@
-var gamestage = "dealing 1st card";
+var gamestage = "ask for player name";
 var dealerCards = [];
 var PlayerCards = [];
 var dealerFaceUp = [];
 var PlayerFaceUp = [];
 var deck = [];
 var shuffledDeck = [];
-
+var playerName = "";
+var dealerName = "";
+var playerPoints = 100;
+var dealerPoints = 100;
+var playerWager = 0;
+var dealerWager = 0;
+var playerWinCount = 0;
+var DealerWinCount = 0;
 //everyone is dealt face up card
 // everyone except dealer is given another face up card except computer gets it face
 //number = score, aces = 1 (currently), jack king queen =10
@@ -14,93 +21,13 @@ var shuffledDeck = [];
 // if u dont want anymore cards, say stay
 // once the round has ended, delaer shall flip the facedown card
 //if its 16 and below, they need to take another card
-var main = function (input) {
-  deck = makeDeck();
-  shuffledDeck = shuffleTheDeck(deck);
-  //both player and computer gets dealt one card each
-  if (gamestage == "dealing 1st card") {
-    for (i = 0; i < 2; i += 1) {
-      giveDealerCard();
-      givePlayerCard();
-    }
-    //check if either dealer or player has score 21
-    var playerscore = calcPlayerScore();
-    console.log("player score= " + playerscore);
-    var dealerscore = calcDealerScore();
-    console.log("dealer score = " + dealerscore);
-    //outputvalue for if there are no naturals
-    var outputvalue = `Your player ▶ cards are ${PlayerFaceUp} <br>  the dealer🤝 cards are ${dealerFaceUp}! <br><br>you the player ▶ can continue the game by choosing to "hit" or "stay".  `;
-    if (playerscore == 21) {
-      //player21 = true;
-
-      if (dealerscore == 21) {
-        //dealer21 = true;
-        outputvalue = "there is a draw";
-      } else if (dealerscore != 21) {
-        outputvalue = "player ▶ has won by scoring 21 and dealer 🤝 did not score 21";
-      }
-    }
-    gamestage = "player hit stay";
-  } else if (gamestage == "player hit stay") {
-    //player opts to hit so deal that guy a card!
-    if (input == "hit") {
-      givePlayerCard();
-      var playerscore = calcPlayerScore();
-      console.log(`player score = ` + playerscore);
-      if (playerscore > 21) {
-        outputvalue = "OH NO! you the player ▶ have busted the score of 21";
-      } else if (playerscore == 21) {
-        outputvalue = "YAY! you the player ▶ have won because you scored 21";
-      } else if (playerscore < 21) {
-        outputvalue = `you the player ▶ have not hit 21.<br> <br>Your cards are ${PlayerFaceUp} <br>the dealer 🤝 cards are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
-      }
-    } else if (input == "stay") {
-      gamestage = "dealer hit stay";
-      //remove all the 'hidden cards' from the face up array
-      while (dealerFaceUp.length > 1) {
-        dealerFaceUp.pop();
-      }
-      var counter = 1;
-      //replace the hidden cards with legit cards
-      while (dealerFaceUp.length < dealerCards.length) {
-        dealerFaceUp.push(`${dealerCards[counter].name} of ${dealerCards[counter].suit}`);
-        counter += 1;
-      }
-
-      outputvalue = "it is now the dealer's turn 🤝 to choose 'hit' or 'stay'" + `<br><br>the dealer's cards are ${dealerFaceUp}`;
-    }
-  } else if (gamestage == "dealer hit stay") {
-    if (input == "hit") {
-      giveDealerCard();
-      var dealerscore = calcDealerScore();
-      console.log(`dealer score = ` + dealerscore);
-      if (dealerscore > 21) {
-        outputvalue = "OH NO! you the dealer 🤝 have busted the score of 21";
-      } else if (dealerscore == 21) {
-        outputvalue = "YAY! you the dealer 🤝 have won because you scored 21";
-      } else if (dealerscore < 21) {
-        outputvalue = `you the dealer 🤝 have not hit 21.<br> <br>player's cards ▶ are ${PlayerFaceUp} <br>your cards 🤝 are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
-      }
-    } else if (input == "stay") {
-      gamestage = "comparison";
-      outputvalue = "click 'submit' to compare the total score of the cards";
-    }
-  } else if (gamestage == "comparison") {
-    var playerscore = calcPlayerScore();
-    var dealerscore = calcDealerScore();
-
-    if (playerscore > dealerscore) {
-      winner = "the player ▶ win!";
-    } else if (playerscore < dealerscore) {
-      winner = "The dealer 🤝 wins !";
-    } else if (playerscore == dealerscore) {
-      winner = "There is a draw!";
-    }
-    outputvalue = winner + `<br>player's cards ▶ are ${PlayerFaceUp} <br>the dealer cards 🤝 are ${dealerFaceUp}!`;
-  }
-  return outputvalue;
+var makeScoreBoard = function () {
+  var scoreBoard = `<br><br>${dealerName} points : ${dealerPoints}<br>
+  ${playerName} points : ${playerPoints}<br>
+  ${dealerName} win count : ${DealerWinCount}<br>
+  ${playerName} win count : ${playerWinCount}   `;
+  return scoreBoard;
 };
-
 var makeDeck = function () {
   var cardDeck = [];
   var suits = ["hearts", "diamonds", "clubs", "spades"];
@@ -114,7 +41,7 @@ var makeDeck = function () {
     for (i = 0; i < names.length; i += 1) {
       var currentName = names[i];
       if (currentName == "ace") {
-        var currentScore = 1;
+        var currentScore = 11;
         //by default
       } else if (currentName == "jack" || currentName == "queen" || currentName == "king") {
         var currentScore = 10;
@@ -189,4 +116,136 @@ var giveDealerCard = function () {
   } else if (dealerCards.length > 1) {
     dealerFaceUp.push("hidden card");
   }
+};
+var main = function (input) {
+  deck = makeDeck();
+  shuffledDeck = shuffleTheDeck(deck);
+  //both player and computer gets dealt one card each
+  if (gamestage == "ask for player name") {
+    playerName = input;
+    gamestage = "ask for player wager";
+    outputvalue = `Hi ${input}! you are now a player ▶! <br> <br> ${playerName}, please enter the amount of points you want to wager`;
+  } else if (gamestage == "ask for player wager") {
+    playerWager = input;
+    gamestage = "ask for dealer name";
+    outputvalue = `${playerName}, you have decided to wager ${playerWager} points! <br><br> It is now the dealer's turn 🤝to enter his/her name!`;
+  } else if (gamestage == "ask for dealer name") {
+    dealerName = input;
+    gamestage = "ask for dealer wager";
+    outputvalue = `Hi ${input}! you are now the dealer 🤝 of the game <br> <br> ${dealerName}, please enter the amount of points you want to wager`;
+  } else if (gamestage == "ask for dealer wager") {
+    gamestage = "dealing 1st card";
+    dealerWager = Number(input);
+    outputvalue = `${dealerName}, you have decided to wager ${dealerWager} points! <br><br> Click "submit" to start the game and let the player start his turn!🃏🎰`;
+  } else if (gamestage == "dealing 1st card") {
+    for (i = 0; i < 2; i += 1) {
+      giveDealerCard();
+      givePlayerCard();
+    }
+    //check if either dealer or player has score 21
+    var playerscore = calcPlayerScore();
+    console.log("player score= " + playerscore);
+    var dealerscore = calcDealerScore();
+    console.log("dealer score = " + dealerscore);
+    //outputvalue for if there are no naturals
+    var outputvalue = `Your player ▶ cards are ${PlayerFaceUp} <br>  the dealer🤝 cards are ${dealerFaceUp}! <br><br>you the player ▶ can continue the game by choosing to "hit" or "stay".  `;
+    if (playerscore == 21) {
+      //player21 = true;
+      if (dealerscore == 21) {
+        //dealer21 = true;
+        outputvalue = "there is a draw";
+      } else if (dealerscore != 21) {
+        // player wins here
+        playerPoints += dealerWager;
+        dealerPoints -= dealerWager;
+        playerWinCount += 1;
+        outputvalue = "player ▶ has won by scoring 21 and dealer 🤝 did not score 21" + makeScoreBoard();
+      }
+    }
+    gamestage = "player hit stay";
+    //dealer choose hit or stay , there are win or lose outcomes here to sift
+  } else if (gamestage == "player hit stay") {
+    //player opts to hit so deal that guy a card!
+    if (input == "hit") {
+      givePlayerCard();
+      var playerscore = calcPlayerScore();
+      console.log(`player score = ` + playerscore);
+      if (playerscore > 21) {
+        // dealer wins here
+        DealerWinCount += 1;
+        playerPoints -= playerWager;
+        dealerPoints += playerWager;
+        outputvalue = "OH NO! you the player ▶ have busted the score of 21" + makeScoreBoard();
+      } else if (playerscore == 21) {
+        //player wins here
+        playerPoints += dealerWager;
+        dealerPoints -= dealerWager;
+        playerWinCount += 1;
+        outputvalue = "YAY! you the player ▶ have won because you scored 21" + makeScoreBoard();
+      } else if (playerscore < 21) {
+        outputvalue = `you the player ▶ have not hit 21.<br> <br>Your cards are ${PlayerFaceUp} <br>the dealer 🤝 cards are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
+      }
+    } else if (input == "stay") {
+      gamestage = "dealer hit stay";
+      //remove all the 'hidden cards' from the face up array
+      while (dealerFaceUp.length > 1) {
+        dealerFaceUp.pop();
+      }
+      var counter = 1;
+      //replace the hidden cards with legit cards
+      while (dealerFaceUp.length < dealerCards.length) {
+        dealerFaceUp.push(`${dealerCards[counter].name} of ${dealerCards[counter].suit}`);
+        counter += 1;
+      }
+
+      outputvalue = "it is now the dealer's turn 🤝 to choose 'hit' or 'stay'" + `<br><br>the dealer's cards are ${dealerFaceUp}`;
+    }
+    //
+  } else if (gamestage == "dealer hit stay") {
+    if (input == "hit") {
+      giveDealerCard();
+      var dealerscore = calcDealerScore();
+      console.log(`dealer score = ` + dealerscore);
+      if (dealerscore > 21) {
+        //dealer loses here and player wins
+        playerPoints += dealerWager;
+        dealerPoints -= dealerWager;
+        playerWinCount += 1;
+        outputvalue = "OH NO! you the dealer 🤝 have busted the score of 21" + makeScoreBoard();
+      } else if (dealerscore == 21) {
+        //dealer wins here
+        DealerWinCount += 1;
+        playerPoints -= playerWager;
+        dealerPoints += playerWager;
+        outputvalue = "YAY! you the dealer 🤝 have won because you scored 21" + makeScoreBoard();
+      } else if (dealerscore < 21) {
+        outputvalue = `you the dealer 🤝 have not hit 21.<br> <br>player's cards ▶ are ${PlayerFaceUp} <br>your cards 🤝 are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
+      }
+    } else if (input == "stay") {
+      gamestage = "comparison";
+      outputvalue = "click 'submit' to compare the total score of the cards";
+    }
+    // comparison to find the winner if no one has busts yet
+  } else if (gamestage == "comparison") {
+    var playerscore = calcPlayerScore();
+    var dealerscore = calcDealerScore();
+
+    if (playerscore > dealerscore) {
+      // player wins here
+      playerPoints += dealerWager;
+      dealerPoints -= dealerWager;
+      playerWinCount += 1;
+      winner = "the player ▶ win!";
+    } else if (playerscore < dealerscore) {
+      //dealer wins here
+      DealerWinCount += 1;
+      playerPoints -= playerWager;
+      dealerPoints += playerWager;
+      winner = "The dealer 🤝 wins !";
+    } else if (playerscore == dealerscore) {
+      winner = "There is a draw!";
+    }
+    outputvalue = winner + `<br>player's cards ▶ are ${PlayerFaceUp} <br>the dealer cards 🤝 are ${dealerFaceUp}!` + makeScoreBoard();
+  }
+  return outputvalue;
 };
