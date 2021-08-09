@@ -52,7 +52,7 @@ var main = function (input) {
       } else if (playerscore == 21) {
         outputvalue = "YAY! you the player ▶ have won because you scored 21";
       } else if (playerscore < 21) {
-        outputvalue = `you the player ▶ have not hit 21. <br>Your cards are ${PlayerFaceUp} <br>the dealer 🤝 cards are ${dealerFaceUp}!<br>you can continue to choose "hit" or "stay"`;
+        outputvalue = `you the player ▶ have not hit 21.<br> <br>Your cards are ${PlayerFaceUp} <br>the dealer 🤝 cards are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
       }
     } else if (input == "stay") {
       gamestage = "dealer hit stay";
@@ -115,6 +115,7 @@ var makeDeck = function () {
       var currentName = names[i];
       if (currentName == "ace") {
         var currentScore = 1;
+        //by default
       } else if (currentName == "jack" || currentName == "queen" || currentName == "king") {
         var currentScore = 10;
       } else if (currentName != NaN) {
@@ -144,15 +145,34 @@ var shuffleTheDeck = function (deck) {
 
 var calcPlayerScore = function () {
   var playerScore = 0;
+  var playerNumberOfAces = 0;
   for (i = 0; i < PlayerCards.length; i += 1) {
+    if (PlayerCards[i].name == "ace") {
+      playerNumberOfAces += 1;
+    }
     playerScore += PlayerCards[i].score;
+  }
+  if (playerScore > 21) {
+    for (i = 0; i < playerNumberOfAces; i += 1) {
+      playerScore -= 10;
+    }
   }
   return playerScore;
 };
+
 var calcDealerScore = function () {
   var dealerScore = 0;
+  var dealerNumberOfAces = 0;
   for (i = 0; i < dealerCards.length; i += 1) {
+    if (dealerCards[i].name == "ace") {
+      dealerNumberOfAces += 1;
+    }
     dealerScore += dealerCards[i].score;
+  }
+  if (dealerScore > 21) {
+    for (i = 0; i < dealerNumberOfAces; i += 1) {
+      dealerscore -= 10;
+    }
   }
   return dealerScore;
 };
