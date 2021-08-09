@@ -29,7 +29,7 @@ var main = function (input) {
     var dealerscore = calcDealerScore();
     console.log("dealer score = " + dealerscore);
     //outputvalue for if there are no naturals
-    var outputvalue = `Your cards are ${PlayerFaceUp} <br>  the dealer cards are ${dealerFaceUp}! <br>you can continue the game by choosing to "hit" or "stay".  `;
+    var outputvalue = `Your player ▶ cards are ${PlayerFaceUp} <br>  the dealer🤝 cards are ${dealerFaceUp}! <br><br>you the player ▶ can continue the game by choosing to "hit" or "stay".  `;
     if (playerscore == 21) {
       //player21 = true;
 
@@ -37,40 +37,66 @@ var main = function (input) {
         //dealer21 = true;
         outputvalue = "there is a draw";
       } else if (dealerscore != 21) {
-        outputvalue = "player has won by scoring 21 and computer did not score 21";
+        outputvalue = "player ▶ has won by scoring 21 and dealer 🤝 did not score 21";
       }
     }
-    gamestage = "hit stay";
-  } else if (gamestage == "hit stay") {
+    gamestage = "player hit stay";
+  } else if (gamestage == "player hit stay") {
     //player opts to hit so deal that guy a card!
     if (input == "hit") {
       givePlayerCard();
       var playerscore = calcPlayerScore();
       console.log(`player score = ` + playerscore);
       if (playerscore > 21) {
-        outputvalue = "OH NO! you have busted the score of 21";
+        outputvalue = "OH NO! you the player ▶ have busted the score of 21";
       } else if (playerscore == 21) {
-        outputvalue = "YAY! you have won because you scored 21";
+        outputvalue = "YAY! you the player ▶ have won because you scored 21";
       } else if (playerscore < 21) {
-        outputvalue = `you have not hit 21. <br>Your cards are ${PlayerFaceUp} <br>the dealer cards are ${dealerFaceUp}!<br>you can continue to choose "hit" or "stay"`;
+        outputvalue = `you the player ▶ have not hit 21. <br>Your cards are ${PlayerFaceUp} <br>the dealer 🤝 cards are ${dealerFaceUp}!<br>you can continue to choose "hit" or "stay"`;
+      }
+    } else if (input == "stay") {
+      gamestage = "dealer hit stay";
+      //remove all the 'hidden cards' from the face up array
+      while (dealerFaceUp.length > 1) {
+        dealerFaceUp.pop();
+      }
+      var counter = 1;
+      //replace the hidden cards with legit cards
+      while (dealerFaceUp.length < dealerCards.length) {
+        dealerFaceUp.push(`${dealerCards[counter].name} of ${dealerCards[counter].suit}`);
+        counter += 1;
+      }
+
+      outputvalue = "it is now the dealer's turn 🤝 to choose 'hit' or 'stay'" + `<br><br>the dealer's cards are ${dealerFaceUp}`;
+    }
+  } else if (gamestage == "dealer hit stay") {
+    if (input == "hit") {
+      giveDealerCard();
+      var dealerscore = calcDealerScore();
+      console.log(`dealer score = ` + dealerscore);
+      if (dealerscore > 21) {
+        outputvalue = "OH NO! you the dealer 🤝 have busted the score of 21";
+      } else if (dealerscore == 21) {
+        outputvalue = "YAY! you the dealer 🤝 have won because you scored 21";
+      } else if (dealerscore < 21) {
+        outputvalue = `you the dealer 🤝 have not hit 21.<br> <br>player's cards ▶ are ${PlayerFaceUp} <br>your cards 🤝 are ${dealerFaceUp}!<br><br>you can continue to choose "hit" or "stay"`;
       }
     } else if (input == "stay") {
       gamestage = "comparison";
-      outputvalue = "please click submit to compare your scores";
+      outputvalue = "click 'submit' to compare the total score of the cards";
     }
   } else if (gamestage == "comparison") {
     var playerscore = calcPlayerScore();
     var dealerscore = calcDealerScore();
-    dealerFaceUp.pop();
-    dealerFaceUp.push(`${dealerCards[1].name} of ${dealerCards[1].suit}`);
+
     if (playerscore > dealerscore) {
-      winner = "You win!";
+      winner = "the player ▶ win!";
     } else if (playerscore < dealerscore) {
-      winner = "The dealer wins!";
+      winner = "The dealer 🤝 wins !";
     } else if (playerscore == dealerscore) {
       winner = "There is a draw!";
     }
-    outputvalue = winner + `<br>Your cards are ${PlayerFaceUp} <br>the dealer cards are ${dealerFaceUp}!`;
+    outputvalue = winner + `<br>player's cards ▶ are ${PlayerFaceUp} <br>the dealer cards 🤝 are ${dealerFaceUp}!`;
   }
   return outputvalue;
 };
