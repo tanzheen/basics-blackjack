@@ -1,18 +1,15 @@
-var gamestage = "ask for player name";
-var dealerCards = [];
-var PlayerCards = [];
-var dealerFaceUp = [];
-var PlayerFaceUp = [];
+var gamestage = "ask for number of players";
+var numOfPlayersCheckedIn = 0;
+var numberOfPlayers = 0;
+
 var deck = [];
 var shuffledDeck = [];
 var playerName = "";
 var dealerName = "";
-var playerPoints = 100;
-var dealerPoints = 100;
-var playerWager = 0;
-var dealerWager = 0;
-var playerWinCount = 0;
-var DealerWinCount = 0;
+
+//players data would consists of their cards(both face up and hidden), their face up cards, their current points , their win count.
+var playersData = [];
+
 //everyone is dealt face up card
 // everyone except dealer is given another face up card except computer gets it face
 //number = score, aces = 1 (currently), jack king queen =10
@@ -21,6 +18,8 @@ var DealerWinCount = 0;
 // if u dont want anymore cards, say stay
 // once the round has ended, delaer shall flip the facedown card
 //if its 16 and below, they need to take another card
+
+// make a scoreboard
 var makeScoreBoard = function () {
   var scoreBoard = `<br><br>${dealerName} points : ${dealerPoints}<br>
   ${playerName} points : ${playerPoints}<br>
@@ -28,6 +27,8 @@ var makeScoreBoard = function () {
   ${playerName} win count : ${playerWinCount}   `;
   return scoreBoard;
 };
+
+// make the deck of 52 cards
 var makeDeck = function () {
   var cardDeck = [];
   var suits = ["hearts", "diamonds", "clubs", "spades"];
@@ -58,6 +59,7 @@ var makeDeck = function () {
   }
   return cardDeck;
 };
+// function that randomly shuffles the deck
 var shuffleTheDeck = function (deck) {
   for (i = 0; i < deck.length; i += 1) {
     var randomNumber = Math.random() * deck.length;
@@ -69,7 +71,7 @@ var shuffleTheDeck = function (deck) {
   }
   return deck;
 };
-
+//function that actually calculates the score of the cards in the players hand
 var calcPlayerScore = function () {
   var playerScore = 0;
   var playerNumberOfAces = 0;
@@ -87,6 +89,8 @@ var calcPlayerScore = function () {
   return playerScore;
 };
 
+//function that calculate the score of the dealer cards after his hidden cards are revealed
+
 var calcDealerScore = function () {
   var dealerScore = 0;
   var dealerNumberOfAces = 0;
@@ -103,6 +107,7 @@ var calcDealerScore = function () {
   }
   return dealerScore;
 };
+
 var givePlayerCard = function () {
   var playerDraws = shuffledDeck.pop();
   PlayerCards.push(playerDraws);
@@ -121,14 +126,32 @@ var main = function (input) {
   deck = makeDeck();
   shuffledDeck = shuffleTheDeck(deck);
   //both player and computer gets dealt one card each
-  if (gamestage == "ask for player name") {
-    playerName = input;
+  if (gamestage == "ask for number of players") {
+    gamestage = "ask for player name";
+    numberOfPlayers = Number(input);
+    outputvalue = "May the first player now enter his/her name!😊";
+  } else if (gamestage == "ask for player name") {
+    currentPlayerName = input;
+    var player = {
+      name: currentPlayerName,
+      wincount: 0,
+      points: 100,
+    };
+    playersData.push(player);
+
     gamestage = "ask for player wager";
-    outputvalue = `Hi ${input}! you are now a player ▶! <br> <br> ${playerName}, please enter the amount of points you want to wager`;
+    outputvalue = `Hi ${input}! you are now a player ▶! <br> <br> ${playersData[numOfPlayersCheckedIn].name}, please enter the amount of points you want to wager`;
   } else if (gamestage == "ask for player wager") {
-    playerWager = input;
-    gamestage = "ask for dealer name";
-    outputvalue = `${playerName}, you have decided to wager ${playerWager} points! <br><br> It is now the dealer's turn 🤝to enter his/her name!`;
+    currentPlayerWager = input;
+    playersData[numOfPlayersCheckedIn].wager = currentPlayerWager;
+    numOfPlayersCheckedIn += 1;
+    if (numOfPlayersCheckedIn < numberOfPlayers) {
+      gamestage = "ask for player name";
+      outputvalue = `${playersData[numOfPlayersCheckedIn].name}, you have decided to wager ${currentPlayerWager} points! <br><br>May player ${numOfPlayersCheckedIn + 1} now enter his/her name!😊`;
+    } else if (numOfPlayersCheckedIn == numberOfPlayers) {
+      gamestage = "ask for dealer name";
+      outputvalue = `${playersData[numOfPlayersCheckedIn].name}, you have decided to wager ${currentPlayerWager} points! <br><br> It is now the dealer's turn 🤝to enter his/her name!`;
+    }
   } else if (gamestage == "ask for dealer name") {
     dealerName = input;
     gamestage = "ask for dealer wager";
